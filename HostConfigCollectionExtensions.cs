@@ -16,6 +16,7 @@ public static class HostConfigCollectionExtensions
         {
             var provider = staticFileProvider.Get<StaticFileProvider>();
             app.RegisterStaticFile(provider!);
+            Configuration.StaticFileProviderList.Add(provider!);
         }
         return app;
     }
