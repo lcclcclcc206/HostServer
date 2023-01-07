@@ -10,8 +10,9 @@
 </div>
 
 <ul>
-    @foreach(var provider in Configuration.StaticFileProviderList)
+    @foreach (var provider in Configuration.StaticFileProviderList)
     {
+
         <li>
             <a href="@provider.RequestPath">@provider.DisplayName</a>
         </li>

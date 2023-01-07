@@ -1,11 +1,14 @@
 using Microsoft.Extensions.FileProviders;
 using HostServer.Extensions;
+using NLog;
+using NLog.Web;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
 builder.Services.AddHostStaticFile();
+builder.Host.UseNLog();
 
 var app = builder.Build();
 
@@ -21,14 +24,9 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
-app.UseHostStaticFile(app.Configuration);
+app.UseHostStaticFile(app.Configuration, app.Logger);
 
 app.UseRouting();
-
-app.MapGet("/ÄãºÃ", () =>
-{
-    return "Hello";
-});
 
 app.UseAuthorization();
 
