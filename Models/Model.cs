@@ -1,4 +1,4 @@
-﻿namespace HostServer
+﻿namespace HostServer.Models
 {
     public static class Configuration
     {
