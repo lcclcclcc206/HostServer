@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "文件上传";
+}
+
+<div class="mb-5 mt-5">
+    <h1>文件上传</h1>
+    <a href="/static/FileUpload">文件上传目录</a>
+</div>
+
+<div class="mb-4">
+    <h4>文件上传要求</h4>
+    <ul>
+        <li>一次只能上传一个文件</li>
+        <li>上传文件的大小限制为 100MB</li>
+        <li>上传同名文件会返回错误页</li>
+    </ul>
+</div>
+
+<form enctype="multipart/form-data" method="post">
+    <div class="mb-3">
+        <label for="uploadFile" class="form-label">选择上传的文件</label>
+        <div class="input-group">
+            <input name="uploadFile" class="form-control" type="file" id="uploadFile" />
+            <button class="btn btn-primary" type="submit" asp-action="Index">开始上传</button>
+        </div>
+    </div>
+</form>
+

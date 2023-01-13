@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Home\" />
+    <Folder Include="publish\" />
   </ItemGroup>
 
 </Project>

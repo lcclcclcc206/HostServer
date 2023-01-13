@@ -26,6 +26,23 @@ app.UseStaticFiles();
 
 app.UseHostStaticFile(app.Configuration, app.Logger);
 
+var fileUploadProvider = new PhysicalFileProvider(Path.Combine(Path.GetFullPath(Environment.CurrentDirectory), "static\\FileUpload"));
+var fileUploadRequestPath = "/static/FileUpload";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = fileUploadProvider,
+    RequestPath = fileUploadRequestPath,
+    ServeUnknownFileTypes = true,
+    DefaultContentType = "octet-stream"
+});
+
+app.UseDirectoryBrowser(new DirectoryBrowserOptions
+{
+    FileProvider = fileUploadProvider,
+    RequestPath = fileUploadRequestPath
+});
+
 app.UseRouting();
 
 app.UseAuthorization();
