@@ -1,6 +1,6 @@
 ﻿@using HostServer.Models;
 @{
-    ViewData["Title"] = "Home page";
+    ViewData["Title"] = "主页";
 }
 
 <div class="text-center">
@@ -9,11 +9,11 @@
 
 <h2 class="mb-3">文件目录</h2>
 <ul>
-    @foreach (var provider in Configuration.StaticFileProviderList)
+    @foreach (var provider in HostConfiguration.UniversalFileProviderList!)
     {
 
         <li>
-            <a href="@provider.RequestPath">@provider.DisplayName</a>
+            <a href="@provider.RequestPath" target="_blank">@provider.DisplayName</a>
         </li>
     }
 </ul>

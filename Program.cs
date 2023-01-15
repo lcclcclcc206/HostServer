@@ -2,13 +2,24 @@ using Microsoft.Extensions.FileProviders;
 using HostServer.Extensions;
 using NLog;
 using NLog.Web;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("Configuration/staticfile.json", optional: true);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddHostStaticFile();
 builder.Host.UseNLog();
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 1073741824;
+});
+builder.Services.Configure<IISServerOptions>(options =>
+{
+    options.MaxRequestBodyBufferSize = 1073741824;
+});
 
 var app = builder.Build();
 
@@ -24,24 +35,9 @@ if (!app.Environment.IsDevelopment())
 
 app.UseStaticFiles();
 
-app.UseHostStaticFile(app.Configuration, app.Logger);
+app.UseUniversalFile(app.Configuration, app.Logger);
 
-var fileUploadProvider = new PhysicalFileProvider(Path.Combine(Path.GetFullPath(Environment.CurrentDirectory), "static\\FileUpload"));
-var fileUploadRequestPath = "/static/FileUpload";
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = fileUploadProvider,
-    RequestPath = fileUploadRequestPath,
-    ServeUnknownFileTypes = true,
-    DefaultContentType = "octet-stream"
-});
-
-app.UseDirectoryBrowser(new DirectoryBrowserOptions
-{
-    FileProvider = fileUploadProvider,
-    RequestPath = fileUploadRequestPath
-});
+app.UseUploadFile(app.Configuration, app.Logger);
 
 app.UseRouting();
 
@@ -50,5 +46,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Logger.LogInformation("Host server start up");
 
 app.Run();

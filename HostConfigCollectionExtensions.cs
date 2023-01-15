@@ -10,34 +10,70 @@ public static class HostConfigCollectionExtensions
         services.AddDirectoryBrowser();
         return services;
     }
-    public static IApplicationBuilder UseHostStaticFile(this IApplicationBuilder app, IConfiguration configuration, ILogger logger)
+    public static IApplicationBuilder UseUniversalFile(this IApplicationBuilder app, IConfiguration configuration, ILogger logger)
     {
-        var staticFileProviderList = configuration.GetSection("StaticFileProvider").GetChildren();
+        var universalFileProviderList = configuration.GetSection("Universal").GetChildren();
 
-        foreach (var staticFileProvider in staticFileProviderList)
+        foreach (var universalFileProvider in universalFileProviderList)
         {
-            var provider = staticFileProvider.Get<StaticFileProvider>();
-            if(Directory.Exists(provider!.RootPath))
+            var provider = universalFileProvider.Get<StaticFileProvider>();
+            if (Directory.Exists(provider!.RootPath))
             {
                 app.RegisterStaticFile(provider!, logger);
-                Configuration.StaticFileProviderList.Add(provider!);
+                HostConfiguration.UniversalFileProviderList!.Add(provider!);
             }
             else
             {
                 logger.LogError($"The directory: {provider.RootPath} is not exist!");
                 continue;
             }
-            
         }
-
         return app;
     }
 
+    public static IApplicationBuilder UseUploadFile(this IApplicationBuilder app, IConfiguration configuration, ILogger logger)
+    {
+        var uploadFileProvider = configuration.GetSection("UploadFile");
+        var provider = uploadFileProvider.Get<UploadFileStaticFileProvider>();
+
+        string defaultRootPath = "./static/uploadfile";
+        string defaultRequestPath = "/static/uploadfile";
+
+        if (provider is null)
+        {
+            logger.LogWarning($"Do not find the configuration of 'UploadFile' , use default configuration, RootPath: {defaultRootPath}, RequestPath: {defaultRequestPath}");
+            provider = new UploadFileStaticFileProvider
+            {
+                RootPath = defaultRootPath,
+                RequestPath = defaultRequestPath
+            };
+        }
+
+        if (Path.Exists(provider.RootPath) is false)
+        {
+            if (provider.RootPath is null)
+            {
+                provider.RootPath = defaultRootPath;
+                logger.LogWarning($"Do not find the configuration of 'UploadFile:RootPath' , use default configuration, RootPath: {defaultRootPath}");
+            }
+            else
+            {
+                logger.LogWarning($"The configuration of 'UploadFile:RootPath' is not Exist, create the directory: {provider.RootPath}");
+                Directory.CreateDirectory(provider.RootPath!);
+            }
+        }
+
+        app.RegisterStaticFile(provider, logger);
+        HostConfiguration.UploadFileProvider = provider;
+
+        return app;
+    }
     private static IApplicationBuilder RegisterStaticFile(this IApplicationBuilder app, StaticFileProvider provider, ILogger logger)
     {
         try
         {
-            var fileProvider = new PhysicalFileProvider(provider.RootPath!);
+            provider.RootPath = Path.GetFullPath(provider.RootPath!);
+            var fileProvider = new PhysicalFileProvider(provider.RootPath);
             var requestPath = provider.RequestPath!;
 
             app.UseStaticFiles(new StaticFileOptions

@@ -1,28 +1,38 @@
-﻿@{
+﻿@using HostServer.Models;
+@{
     ViewData["Title"] = "文件上传";
 }
 
 <div class="mb-5 mt-5">
     <h1>文件上传</h1>
-    <a href="/static/FileUpload">文件上传目录</a>
+    <a href="@HostConfiguration.UploadFileProvider!.RequestPath" target="_blank">文件上传目录</a>
 </div>
 
 <div class="mb-4">
     <h4>文件上传要求</h4>
     <ul>
-        <li>一次只能上传一个文件</li>
-        <li>上传文件的大小限制为 100MB</li>
-        <li>上传同名文件会返回错误页</li>
+        <li>一次能上传多个文件</li>
+        <li>单个上传文件的大小限制为 100MB，总文件大小限制为 1GB</li>
+        <li>上传同名文件会覆盖原有文件</li>
     </ul>
 </div>
 
 <form enctype="multipart/form-data" method="post">
     <div class="mb-3">
-        <label for="uploadFile" class="form-label">选择上传的文件</label>
+        <label for="uploadFiles" class="form-label">选择上传的文件</label>
         <div class="input-group">
-            <input name="uploadFile" class="form-control" type="file" id="uploadFile" />
+            <input name="uploadFiles" class="form-control" type="file" multiple id="uploadFiles" onchange="ChangeUploadFile()" />
             <button class="btn btn-primary" type="submit" asp-action="Index">开始上传</button>
         </div>
     </div>
 </form>
 
+@section Scripts{
+    <script src="~/js/Validation.js">
+    </script>
+    <script>
+        ChangeUploadFile = () => {
+            FileSizeValidation("uploadFiles", @HostConfiguration.UploadFileProvider.FileSizeLimit);
+        }
+    </script>
+}
