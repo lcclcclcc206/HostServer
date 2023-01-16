@@ -364,4 +364,4 @@ FodyWeavers.xsd
 
 # Custom by lcc
 /static
-/Configuration
+/temp
