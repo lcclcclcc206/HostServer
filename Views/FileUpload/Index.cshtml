@@ -1,18 +1,21 @@
 ﻿@using HostServer.Models;
+@using ByteSizeLib;
 @{
     ViewData["Title"] = "文件上传";
 }
 
 <div class="mb-5 mt-5">
     <h1>文件上传</h1>
-    <a href="@HostConfiguration.UploadFileProvider!.RequestPath">文件上传目录</a>
+    <a href="@HostConfiguration.UploadFileProvider!.RequestPath">上传文件目录</a><br />
+    <span>路径：@HostConfiguration.UploadFileProvider!.RootPath</span>
+    <button class="btn btn-primary ms-3" onclick="CopyPath()">复制</button>
 </div>
 
 <div class="mb-4">
     <h4>文件上传要求</h4>
     <ul>
         <li>一次能上传多个文件</li>
-        <li>单个上传文件的大小限制为 100MB，总文件大小限制为 1GB</li>
+        <li>单次上传文件的大小限制为 @HostConfiguration.UploadFileProvider.FileSizeLimit.ToBinaryString()</li>
         <li>上传同名文件会覆盖原有文件</li>
     </ul>
 </div>
@@ -22,17 +25,32 @@
         <label for="uploadFiles" class="form-label">选择上传的文件</label>
         <div class="input-group">
             <input name="uploadFiles" class="form-control" type="file" multiple id="uploadFiles" onchange="ChangeUploadFile()" />
-            <button class="btn btn-primary" type="submit" asp-action="Index">开始上传</button>
+            <button id="uploadButton" class="btn btn-primary" type="submit" asp-action="Index" disabled>开始上传</button>
         </div>
     </div>
 </form>
 
 @section Scripts{
-    <script src="~/js/Validation.js">
-    </script>
+    <script src="~/js/Validation.js"></script>
+    <script src="~/js/Common.js"></script>
     <script>
+        let inputId = "uploadFiles";
+        let buttonId = "uploadButton";
         ChangeUploadFile = () => {
-            FileSizeValidation("uploadFiles", @HostConfiguration.UploadFileProvider.FileSizeLimit);
+            if (FileCountValidation(inputId) == false) {
+                ChangeButtonState(buttonId, false);
+                return;
+            }
+            if (FileSizeValidation(inputId, @HostConfiguration.UploadFileProvider.FileSizeLimit.Bytes) == false) {
+                ChangeButtonState(buttonId, false);
+                let fileSizeLimit = "@HostConfiguration.UploadFileProvider.FileSizeLimit.ToBinaryString()";
+                alert(`File is too Big, please select a file less than ${fileSizeLimit}`);
+                return;
+            }
+            ChangeButtonState(buttonId, true);
+        }
+        CopyPath = () => {
+            navigator.clipboard.writeText('@HostConfiguration.UploadFileProvider!.RootPath!.Replace("\\","\\\\")');
         }
     </script>
 }

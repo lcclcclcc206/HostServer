@@ -3,6 +3,9 @@ using HostServer.Extensions;
 using NLog;
 using NLog.Web;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.AspNetCore.Http.Features;
+using ByteSizeLib;
+using HostServer.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +15,17 @@ builder.Configuration.AddJsonFile("Configuration/staticfile.json", optional: tru
 builder.Services.AddControllersWithViews();
 builder.Services.AddHostStaticFile();
 builder.Host.UseNLog();
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = (int)ByteSize.FromGibiBytes(1).Bytes;
+});
 builder.Services.Configure<KestrelServerOptions>(options =>
 {
-    options.Limits.MaxRequestBodySize = 1073741824;
+    options.Limits.MaxRequestBodySize = (int)ByteSize.FromGibiBytes(1).Bytes;
 });
 builder.Services.Configure<IISServerOptions>(options =>
 {
-    options.MaxRequestBodyBufferSize = 1073741824;
+    options.MaxRequestBodyBufferSize = (int)ByteSize.FromGibiBytes(1).Bytes;
 });
 
 var app = builder.Build();

@@ -1,4 +1,6 @@
-﻿namespace HostServer.Models;
+﻿using ByteSizeLib;
+
+namespace HostServer.Models;
 public class StaticFileProvider
 {
     public string DisplayName { get; set; } = "Default";
@@ -8,5 +10,5 @@ public class StaticFileProvider
 
 public class UploadFileStaticFileProvider : StaticFileProvider
 {
-    public long FileSizeLimit { get; set; } = 1073741824;
+    public ByteSize FileSizeLimit { get; set; } = ByteSize.FromMebiBytes(500);
 }

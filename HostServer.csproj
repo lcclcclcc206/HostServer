@@ -7,6 +7,11 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Content Remove="tsconfig.json" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ByteSize" Version="2.1.1" />
         <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="4.9.4">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -16,7 +21,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="publish\" />
+      <TypeScriptCompile Include="tsconfig.json">
+        <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      </TypeScriptCompile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Doc\" />
     </ItemGroup>
 
     <ProjectExtensions>
