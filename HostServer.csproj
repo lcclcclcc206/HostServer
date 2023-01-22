@@ -27,7 +27,13 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Doc\" />
+        <Content Update="Configuration\**\*">
+            <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+        </Content>
+        <Content Update="publish\**\*">
+            <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+            <CopyToPublishDirectory>Never</CopyToPublishDirectory>
+        </Content>
     </ItemGroup>
 
     <ProjectExtensions>
