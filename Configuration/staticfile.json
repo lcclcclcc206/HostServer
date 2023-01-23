@@ -1,24 +1,14 @@
 {
   "Universal": [
     {
-      "DisplayName": "D盘",
+      "DisplayName": "D:",
       "RootPath": "D:/",
       "RequestPath": "/static"
-    },
-    //{
-    //  "DisplayName": "桌面",
-    //  "RootPath": "C:\\Users\\Administrator\\Desktop",
-    //  "RequestPath": "/static/Desktop"
-    //},
-    //{
-    //  "DisplayName": "扫描仪输出",
-    //  "RootPath": "D:\\文件整合\\Output",
-    //  "RequestPath": "/static/scan"
-    //},
-    //{
-    //  "DisplayName": "电厂专用软件",
-    //  "RootPath": "D:\\文件整合\\电厂专用软件",
-    //  "RequestPath": "/static/software"
-    //}
-  ]
+    }
+  ],
+  "UploadFile": {
+    "RootPath": "./static/uploadfile",
+    "RequestPath": "/static/uploadfile",
+    "FileSizeLimit": 10485760
+  }
 }

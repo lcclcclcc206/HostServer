@@ -10,5 +10,5 @@ public class StaticFileProvider
 
 public class UploadFileStaticFileProvider : StaticFileProvider
 {
-    public ByteSize FileSizeLimit { get; set; } = ByteSize.FromMebiBytes(500);
+    public long FileSizeLimit { get; set; } = (long)ByteSize.FromMebiBytes(500).Bytes;
 }
