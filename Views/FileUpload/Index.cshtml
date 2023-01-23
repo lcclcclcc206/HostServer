@@ -21,7 +21,7 @@
     <h4>文件上传要求</h4>
     <ul>
         <li>一次能上传多个文件</li>
-        <li>单次上传文件的大小限制为 @HostConfiguration.UploadFileProvider.FileSizeLimit.ToBinaryString()</li>
+        <li>单次上传文件的大小限制为 @ByteSize.FromBytes(HostConfiguration.UploadFileProvider.FileSizeLimit).ToBinaryString()</li>
         <li>上传同名文件会覆盖原有文件</li>
     </ul>
 </div>
@@ -48,9 +48,9 @@
                 ChangeButtonState(buttonId, false);
                 return;
             }
-            if (FileSizeValidation(inputId, @HostConfiguration.UploadFileProvider.FileSizeLimit.Bytes) == false) {
+            if (FileSizeValidation(inputId, @HostConfiguration.UploadFileProvider.FileSizeLimit) == false) {
                 ChangeButtonState(buttonId, false);
-                let fileSizeLimit = "@HostConfiguration.UploadFileProvider.FileSizeLimit.ToBinaryString()";
+                let fileSizeLimit = "@ByteSize.FromBytes(HostConfiguration.UploadFileProvider.FileSizeLimit).ToBinaryString()";
                 alert(`File is too Big, please select a file less than ${fileSizeLimit}`);
                 return;
             }

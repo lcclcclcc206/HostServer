@@ -41,7 +41,7 @@ namespace HostServer.Controllers
                 contentSize += uploadFile.Length;
             }
 
-            if (contentSize > HostConfiguration.UploadFileProvider!.FileSizeLimit.Bytes)
+            if (contentSize > HostConfiguration.UploadFileProvider!.FileSizeLimit)
             {
                 var requestId = Activity.Current?.Id;
                 var message = $"The file size: {ByteSize.FromBytes(contentSize)} is over the limit!";
