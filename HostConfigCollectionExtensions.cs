@@ -81,7 +81,14 @@ public static class HostConfigCollectionExtensions
                 FileProvider = fileProvider,
                 RequestPath = requestPath,
                 ServeUnknownFileTypes = true,
-                DefaultContentType = "octet-stream"
+                DefaultContentType = "octet-stream",
+                OnPrepareResponse = context =>
+                {
+                    var headers = context.Context.Response.Headers;
+                    var contentType = headers["Content-Type"];
+                    contentType += "; charset=utf-8";
+                    headers["Content-Type"] = contentType;
+                }
             });
 
             app.UseDirectoryBrowser(new DirectoryBrowserOptions

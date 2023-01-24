@@ -19,13 +19,14 @@ namespace HostServer.Controllers
             _logger = logger;
         }
 
+        [HttpGet]
         public IActionResult Index()
         {
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> IndexAsync(List<IFormFile> uploadFiles)
+        public async Task<IActionResult> UploadFile(List<IFormFile> uploadFiles)
         {
             if (uploadFiles is null || uploadFiles.Count == 0)
             {
@@ -59,7 +60,28 @@ namespace HostServer.Controllers
                 }
             }
 
-            return View();
+            return View("Index");
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> UploadText(string uploadText)
+        {
+            var path = Path.Combine(HostConfiguration.UploadFileProvider!.RootPath!, "text");
+            if(Path.Exists(path) is false)
+            {
+                Directory.CreateDirectory(path);
+            }
+            var t = DateTime.Now;
+            var fileName = $"{t.Year}年{t.Month}月{t.Day}日 {t.Hour}时{t.Minute}分{t.Second}秒.txt";
+            var filePath = Path.Combine(path, fileName);
+            using (var fs = new FileStream(filePath, FileMode.Create))
+            {
+                using (var stream = new StreamWriter(fs))
+                {
+                    await stream.WriteAsync(uploadText);
+                }
+            }
+            return View("Index");
         }
 
         public IActionResult Error()

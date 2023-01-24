@@ -1,0 +1,34 @@
+﻿@using System.Net;
+@using System.Security.Principal;
+@{
+    ViewData["Title"] = "关于";
+}
+
+<h1 class="text-center">关于</h1>
+
+<b>本机 ip 地址</b>
+@{
+    var ipEntry = Dns.GetHostEntry(Dns.GetHostName());
+    List<string> ipList = new();
+    foreach (var ip in ipEntry.AddressList)
+    {
+        if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+        {
+            ipList.Add(ip.ToString());
+        }
+    }
+}
+
+<ul>
+    @foreach (var ip in ipList)
+    {
+        <li>@ip</li>
+    }
+</ul>
+
+<b>应用身份信息</b>
+<ul>
+    <li>UserName: @Environment.UserName</li>
+    <li>UserDomainName: @Environment.UserDomainName</li>
+</ul>
+

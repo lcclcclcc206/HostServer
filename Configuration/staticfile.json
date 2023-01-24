@@ -1,14 +1,3 @@
 {
-  "Universal": [
-    {
-      "DisplayName": "D:",
-      "RootPath": "D:/",
-      "RequestPath": "/static"
-    }
-  ],
-  "UploadFile": {
-    "RootPath": "./static/uploadfile",
-    "RequestPath": "/static/uploadfile",
-    "FileSizeLimit": 10485760
-  }
+
 }

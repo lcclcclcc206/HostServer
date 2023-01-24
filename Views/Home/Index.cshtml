@@ -7,14 +7,18 @@
     <h1 class="display-4">Welcome</h1>
 </div>
 
-<h2 class="mb-3">文件目录</h2>
-<ul>
-    @foreach (var provider in HostConfiguration.UniversalFileProviderList!)
-    {
+<div class="row">
+    <div class="col-6">
+        <h2 class="mb-3">文件目录</h2>
 
-        <li>
-            <a href="@provider.RequestPath"
-            >@provider.DisplayName</a>
-        </li>
-    }
-</ul>
+        <div class="list-group">
+            @foreach (var provider in HostConfiguration.UniversalFileProviderList!)
+            {
+
+                <a href="@provider.RequestPath" class="list-group-item list-group-item-primary list-group-item-action">@provider.DisplayName</a>
+            }
+        </div>
+
+    </div>
+</div>
+
