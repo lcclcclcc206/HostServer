@@ -66,6 +66,13 @@ namespace HostServer.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadText(string uploadText)
         {
+            if(string.IsNullOrEmpty(uploadText))
+            {
+                var requestId = Activity.Current?.Id;
+                var message = $"The content is empty!";
+                return View("Error", new ErrorViewModel() { RequestId = requestId, ErrorMessage = message });
+            }
+
             var path = Path.Combine(HostConfiguration.UploadFileProvider!.RootPath!, "text");
             if(Path.Exists(path) is false)
             {
