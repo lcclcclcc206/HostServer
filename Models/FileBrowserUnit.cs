@@ -7,12 +7,15 @@ namespace HostServer.Models
     {
         public string? BasePath { get; set; }
         public string? RelativePath { get; set; }
-        public string? Path
+        public string Path
         {
             get
             {
+                
                 if(BasePath is null || RelativePath is null)
-                    return null;
+                    return "";
+                BasePath = BasePath.UnifySlash();
+                RelativePath = RelativePath.UnifySlash();
                 return BasePath.MergePath(RelativePath);
             }
         }

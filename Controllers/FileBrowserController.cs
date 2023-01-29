@@ -10,6 +10,13 @@ public class FileBrowserController : Controller
     [BindProperty]
     public string BasePath { get; set; } = @"D:/";
 
+    private readonly ILogger _logger;
+
+    public FileBrowserController(ILogger<FileUploadController> logger)
+    {
+        _logger = logger;
+    }
+
     [HttpGet]
     public IActionResult Index(string? relativePath)
     {
@@ -19,8 +26,8 @@ public class FileBrowserController : Controller
             RelativePath = relativePath is null ? "" : relativePath.UnifySlash()
         };
 
-        var dirs = Directory.GetDirectories(browser.Path!);
-        var files = Directory.GetFiles(browser.Path!);
+        var dirs = Directory.GetDirectories(BasePath);
+        var files = Directory.GetFiles(BasePath);
 
         foreach (var dir in dirs)
         {
