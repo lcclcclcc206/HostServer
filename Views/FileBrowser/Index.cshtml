@@ -1,0 +1,91 @@
+﻿@using HostServer.Extentions;
+@using HostServer.Models;
+@model FileBrowserUnit
+@{
+    ViewData["Title"] = "文件浏览";
+}
+
+@{
+    List<string> urlList = new();
+    if (!string.IsNullOrWhiteSpace(Model.RelativePath))
+    {
+        var path = Model.RelativePath.UnifySlash();
+        var dirList = path.Split('/');
+
+        for (int i = 0; i < dirList.Length; i++)
+        {
+            var url = new List<string>();
+            for (int j = 0; j <= i; j++)
+            {
+                url.Add(dirList[j]);
+            }
+            urlList.Add(string.Join("/", url.ToArray()));
+        }
+    }
+}
+
+<style>
+    a:hover {
+        text-decoration: underline;
+    }
+
+    a {
+        text-decoration: none;
+    }
+</style>
+
+<div class="container m-3 p-3 border rounded" id="FileBrowser">
+    <h3 class="m-3 mb-4 text-center">File Browser</h3>
+
+    @*    <p class="fs-4">
+    Path @Model.BasePath<br />
+    RelativePath @Model.RelativePath
+    </p>*@
+    <div class="fs-4 my-3">
+        Index of
+        <span class="text-wrap" style="letter-spacing: -999px">
+            <a asp-action="Index" class="me-0" style="letter-spacing: 0">/</a>
+            @foreach (var url in urlList)
+            {
+                <a asp-action="Index" asp-route-relativePath="@url" class="mx-0" style="letter-spacing: 0">@url.Split('/').Last()/</a>
+            }
+        </span>
+    </div>
+
+    <a class="btn btn-primary" asp-action="Index">返回根目录</a>
+
+    <table class="table table-bordered mt-4">
+        <thead class="text-center">
+            <tr>
+                <th class="col-6">名称</th>
+                <th class="col">修改日期</th>
+                <th class="col">大小</th>
+                <th class="col-2">操作</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var dir in Model.DirectoryUnits)
+            {
+                <tr>
+                    <td>
+                        <a class="text-decoration-none" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.RelativePath}")">
+                            @dir.RelativePath/
+                        </a>
+                    </td>
+                    <td class="text-center">@dir.ModifyTime.ToString()</td>
+                    <td class="text-center"></td>
+                    <td class="text-center"></td>
+                </tr>
+            }
+            @foreach (var file in Model.FileUnits)
+            {
+                <tr>
+                    <td>@file.Name</td>
+                    <td class="text-center">@file.ModifyTime</td>
+                    <td class="text-center">@file.Size</td>
+                    <td class="text-center"></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
