@@ -1,5 +1,6 @@
 ﻿using ByteSizeLib;
 using HostServer.Extentions;
+using HostServer.Helper;
 
 namespace HostServer.Models
 {
@@ -14,9 +15,9 @@ namespace HostServer.Models
                 
                 if(BasePath is null || RelativePath is null)
                     return "";
-                BasePath = BasePath.UnifySlash();
-                RelativePath = RelativePath.UnifySlash();
-                return BasePath.MergePath(RelativePath);
+                BasePath = PathHelper.UnifySlash(BasePath);
+                RelativePath = PathHelper.UnifySlash(RelativePath);
+                return PathHelper.MergePath(BasePath,RelativePath);
             }
         }
         public List<FileUnit> FileUnits { get; set; } = new();

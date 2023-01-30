@@ -1,5 +1,7 @@
 ﻿@using HostServer.Extentions;
 @using HostServer.Models;
+@using HostServer.Helper;
+@using ByteSizeLib;
 @model FileBrowserUnit
 @{
     ViewData["Title"] = "文件浏览";
@@ -9,7 +11,7 @@
     List<string> urlList = new();
     if (!string.IsNullOrWhiteSpace(Model.RelativePath))
     {
-        var path = Model.RelativePath.UnifySlash();
+        var path = PathHelper.UnifySlash(Model.RelativePath);
         var dirList = path.Split('/');
 
         for (int i = 0; i < dirList.Length; i++)
@@ -54,38 +56,37 @@
 
     <a class="btn btn-primary" asp-action="Index">返回根目录</a>
 
-    <table class="table table-bordered mt-4">
-        <thead class="text-center">
-            <tr>
-                <th class="col-6">名称</th>
-                <th class="col">修改日期</th>
-                <th class="col">大小</th>
-                <th class="col-2">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var dir in Model.DirectoryUnits)
-            {
-                <tr>
-                    <td>
-                        <a class="text-decoration-none" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.RelativePath}")">
-                            @dir.RelativePath/
-                        </a>
-                    </td>
-                    <td class="text-center">@dir.ModifyTime.ToString()</td>
-                    <td class="text-center"></td>
-                    <td class="text-center"></td>
-                </tr>
-            }
-            @foreach (var file in Model.FileUnits)
-            {
-                <tr>
-                    <td>@file.Name</td>
-                    <td class="text-center">@file.ModifyTime</td>
-                    <td class="text-center">@file.Size</td>
-                    <td class="text-center"></td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <div class="container mt-3">
+        <div class="row text-center border-bottom">
+            <div class="col-6 fw-bold">名称</div>
+            <div class="col-2 fw-bold">修改日期</div>
+            <div class="col-2 fw-bold">大小</div>
+            <div class="col-2 fw-bold">操作</div>
+        </div>
+
+        @foreach (var dir in Model.DirectoryUnits)
+        {
+            <div class="row border-bottom">
+                <div class="text-break p-1 col-6">
+                    <a class="fw-bold" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.RelativePath}")">
+                        @dir.RelativePath/
+                    </a>
+                </div>
+                <div class="p-1 col-2">@dir.ModifyTime.ToString()</div>
+                <div class="text-center p-1 col-2"></div>
+                <div class="text-center p-1 col-2"></div>
+            </div>
+        }
+        @foreach (var file in Model.FileUnits)
+        {
+            <div class="row border-bottom">
+                <div class="text-break p-1 col-6">
+                    <a asp-action="DownloadFile" asp-route-fileName="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{file.Name}")">@file.Name</a>
+                </div>
+                <div class="p-1 col-2">@file.ModifyTime</div>
+                <div class="text-center p-1 col-2">@file.Size</div>
+                <div class="text-center p-1 col-2"></div>
+            </div>
+        }
+    </div>
 </div>

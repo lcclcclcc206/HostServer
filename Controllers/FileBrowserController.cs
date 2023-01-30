@@ -1,7 +1,10 @@
 ﻿using ByteSizeLib;
 using HostServer.Extentions;
+using HostServer.Helper;
 using HostServer.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
+using System.Web;
 
 namespace HostServer.Controllers;
 
@@ -20,14 +23,16 @@ public class FileBrowserController : Controller
     [HttpGet]
     public IActionResult Index(string? relativePath)
     {
+
         FileBrowserUnit browser = new()
         {
-            BasePath = Path.GetFullPath(BasePath).UnifySlash(),
-            RelativePath = relativePath is null ? "" : relativePath.UnifySlash()
+            BasePath = PathHelper.UnifySlash(Path.GetFullPath(BasePath)),
+            RelativePath = relativePath is null ? "" : PathHelper.UnifySlash(relativePath)
         };
 
-        var dirs = Directory.GetDirectories(BasePath);
-        var files = Directory.GetFiles(BasePath);
+        var path = PathHelper.UnifySlashForWindows(browser.Path, true);
+        var dirs = Directory.GetDirectories(path);
+        var files = Directory.GetFiles(path);
 
         foreach (var dir in dirs)
         {
@@ -56,5 +61,15 @@ public class FileBrowserController : Controller
         return View(browser);
     }
 
+    [HttpGet]
+    public IActionResult DownloadFile(string fileName)
+    {
+        var path = PathHelper.UnifySlashForWindows(PathHelper.MergePath(BasePath, fileName), false);
 
+        var stream = System.IO.File.OpenRead(path);
+        var provider = new FileExtensionContentTypeProvider();
+        string contentType;
+        provider.TryGetContentType(path, out contentType!);
+        return File(stream, contentType ?? "application/octet-stream", fileName);
+    }
 }
