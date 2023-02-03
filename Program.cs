@@ -15,6 +15,7 @@ builder.Configuration.AddJsonFile("Configuration/staticfile.json", optional: tru
 builder.Services.AddControllersWithViews();
 builder.Services.AddHostStaticFile();
 builder.Host.UseNLog();
+
 builder.Services.Configure<FormOptions>(options =>
 {
     options.MultipartBodyLengthLimit = (int)ByteSize.FromGibiBytes(1).Bytes;
@@ -43,6 +44,8 @@ app.UseStaticFiles();
 app.UseUniversalFile(app.Configuration, app.Logger);
 
 app.UseUploadFile(app.Configuration, app.Logger);
+
+app.UseFileBrowser(app.Configuration, app.Logger);
 
 app.UseRouting();
 

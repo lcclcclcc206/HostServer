@@ -7,7 +7,7 @@ $publishPath = "./publish";
 # Use absolute path to customize
 $deployPath = "D:/HostServer";
 
-Copy-Item -Path "./app_offline.htm" -Destination $deployPath -Force
+Copy-Item -Path "./wwwroot/app_offline.htm" -Destination $deployPath -Force
 
 Set-Location $publishPath
 

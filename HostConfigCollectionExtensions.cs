@@ -12,19 +12,20 @@ public static class HostConfigCollectionExtensions
     }
     public static IApplicationBuilder UseUniversalFile(this IApplicationBuilder app, IConfiguration configuration, ILogger logger)
     {
-        var universalFileProviderList = configuration.GetSection("Universal").GetChildren();
+        var universalFileConfigList = configuration.GetSection("StaticFile:Universal").GetChildren();
 
-        foreach (var universalFileProvider in universalFileProviderList)
+        foreach (var universalFileConfig in universalFileConfigList)
         {
-            var provider = universalFileProvider.Get<StaticFileProvider>();
-            if (Directory.Exists(provider!.RootPath))
+            var config = universalFileConfig.Get<StaticFileConfig>();
+            if (Directory.Exists(config!.RootPath))
             {
-                app.RegisterStaticFile(provider!, logger);
-                HostConfiguration.UniversalFileProviderList!.Add(provider!);
+                HostConfiguration.StaticFileAccessDictionary.Add(config.AccessKey, config.RootPath);
+                app.RegisterStaticFile(config!, logger);
+                HostConfiguration.UniversalFileConfigList!.Add(config!);
             }
             else
             {
-                logger.LogError($"The directory: {provider.RootPath} is not exist!");
+                logger.LogError($"The directory: {config.RootPath} is not exist!");
                 continue;
             }
         }
@@ -33,48 +34,86 @@ public static class HostConfigCollectionExtensions
 
     public static IApplicationBuilder UseUploadFile(this IApplicationBuilder app, IConfiguration configuration, ILogger logger)
     {
-        var uploadFileProvider = configuration.GetSection("UploadFile");
-        var provider = uploadFileProvider.Get<UploadFileStaticFileProvider>();
+        var uploadFileConfig = configuration.GetSection("StaticFile:UploadFile");
+        var config = uploadFileConfig.Get<UploadFileConfig>();
 
         string defaultRootPath = "./static/uploadfile";
         string defaultRequestPath = "/static/uploadfile";
 
-        if (provider is null)
+        if (config is null)
         {
             logger.LogWarning($"Do not find the configuration of 'UploadFile' , use default configuration, RootPath: {defaultRootPath}, RequestPath: {defaultRequestPath}");
-            provider = new UploadFileStaticFileProvider
+            config = new UploadFileConfig
             {
                 RootPath = defaultRootPath,
                 RequestPath = defaultRequestPath
             };
         }
 
-        if (Path.Exists(provider.RootPath) is false)
+        if (Path.Exists(config.RootPath) is false)
         {
-            if (provider.RootPath is null)
+            if (config.RootPath is null)
             {
-                provider.RootPath = defaultRootPath;
+                config.RootPath = defaultRootPath;
                 logger.LogWarning($"Do not find the configuration of 'UploadFile:RootPath' , use default configuration, RootPath: {defaultRootPath}");
             }
             else
             {
-                logger.LogWarning($"The configuration of 'UploadFile:RootPath' is not Exist, create the directory: {provider.RootPath}");
-                Directory.CreateDirectory(provider.RootPath!);
+                logger.LogWarning($"The configuration of 'UploadFile:RootPath' is not Exist, create the directory: {config.RootPath}");
+                Directory.CreateDirectory(config.RootPath!);
             }
         }
 
-        app.RegisterStaticFile(provider, logger);
-        HostConfiguration.UploadFileProvider = provider;
+        HostConfiguration.StaticFileAccessDictionary.Add(config.AccessKey, config.RootPath);
+        app.RegisterStaticFile(config, logger);
+        HostConfiguration.UploadFileConfig = config;
 
         return app;
     }
-    private static IApplicationBuilder RegisterStaticFile(this IApplicationBuilder app, StaticFileProvider provider, ILogger logger)
+
+    public static IApplicationBuilder UseFileBrowser(this IApplicationBuilder app, IConfiguration configuration, ILogger logger)
+    {
+        var section = configuration.GetSection("StaticFile:FileBrowser");
+        var config = section.Get<FileBrowserConfig>();
+        var defaltAccessKey = HostConfiguration.FileBrowserConfig.DefaultAccessKey;
+        var defaultPath = HostConfiguration.FileBrowserConfig.DefaultRootPath;
+
+        if (config is null)
+        {
+            logger.LogWarning("The config of FileBrowser is not found, use default config");
+            config = HostConfiguration.FileBrowserConfig;
+            HostConfiguration.StaticFileAccessDictionary.Add(config.DefaultAccessKey, config.DefaultRootPath);
+            return app;
+        }
+
+        if (config.DefaultAccessKey is null)
+        {
+            config.DefaultAccessKey = defaltAccessKey;
+        }
+
+        if (Directory.Exists(config.DefaultRootPath))
+        {
+            HostConfiguration.StaticFileAccessDictionary.Add(config.DefaultAccessKey, config.DefaultRootPath);
+        }
+        else
+        {
+            logger.LogError($"The directory: {config.DefaultRootPath} is not exist! Use default path: {defaultPath}");
+            config.DefaultRootPath = defaultPath;
+            HostConfiguration.StaticFileAccessDictionary.Add(config.DefaultRootPath, defaultPath);
+        }
+
+        HostConfiguration.FileBrowserConfig = config;
+
+        return app;
+    }
+
+    private static IApplicationBuilder RegisterStaticFile(this IApplicationBuilder app, StaticFileConfig config, ILogger logger)
     {
         try
         {
-            provider.RootPath = Path.GetFullPath(provider.RootPath!);
-            var fileProvider = new PhysicalFileProvider(provider.RootPath);
-            var requestPath = provider.RequestPath!;
+            config.RootPath = Path.GetFullPath(config.RootPath!);
+            var fileProvider = new PhysicalFileProvider(config.RootPath);
+            var requestPath = config.RequestPath!;
 
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -99,7 +138,7 @@ public static class HostConfigCollectionExtensions
         }
         catch (DirectoryNotFoundException ex)
         {
-            logger.LogError($"Can not find the directory: {provider.RootPath}\ninfo: {ex}");
+            logger.LogError($"Can not find the directory: {config.RootPath}\ninfo: {ex}");
         }
 
         return app;

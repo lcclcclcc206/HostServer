@@ -44,17 +44,18 @@
     RelativePath @Model.RelativePath
     </p>*@
     <div class="fs-4 my-3">
+        Access Key: @Model.AccessKey<br />
         Index of
         <span class="text-wrap" style="letter-spacing: -999px">
-            <a asp-action="Index" class="me-0" style="letter-spacing: 0">/</a>
+            <a asp-action="Index" asp-route-AccessKey="@Model.AccessKey" class="me-0" style="letter-spacing: 0">/</a>
             @foreach (var url in urlList)
             {
-                <a asp-action="Index" asp-route-relativePath="@url" class="mx-0" style="letter-spacing: 0">@url.Split('/').Last()/</a>
+                <a asp-action="Index" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@url" class="mx-0" style="letter-spacing: 0">@url.Split('/').Last()/</a>
             }
         </span>
     </div>
 
-    <a class="btn btn-primary" asp-action="Index">返回根目录</a>
+    <a class="btn btn-primary" asp-route-AccessKey="@Model.AccessKey" asp-action="Index">返回根目录</a>
 
     <div class="container mt-3">
         <div class="row text-center border-bottom">
@@ -66,22 +67,26 @@
 
         @foreach (var dir in Model.DirectoryUnits)
         {
-            <div class="row border-bottom">
+            <div class="row border-bottom align-items-center">
                 <div class="text-break p-1 col-6">
-                    <a class="fw-bold" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.RelativePath}")">
+                    <a class="fw-bold" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.RelativePath}")">
                         @dir.RelativePath/
                     </a>
                 </div>
                 <div class="p-1 col-2">@dir.ModifyTime.ToString()</div>
-                <div class="text-center p-1 col-2"></div>
-                <div class="text-center p-1 col-2"></div>
+                <div class="text-center p-1 col-2">
+                    <button onclick="" class="btn btn-outline-primary circle py-0">?</button>
+                </div>
+                <div class="p-1 col-2 text-center">
+                    <a class="btn btn-primary py-0" asp-action="DownloadDirectory" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.RelativePath}")">下载</a>
+                </div>
             </div>
         }
         @foreach (var file in Model.FileUnits)
         {
-            <div class="row border-bottom">
+            <div class="row border-bottom align-items-center">
                 <div class="text-break p-1 col-6">
-                    <a asp-action="DownloadFile" asp-route-fileName="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{file.Name}")">@file.Name</a>
+                    <a asp-action="DownloadFile" asp-route-AccessKey="@Model.AccessKey" asp-route-fileRequestPath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{file.Name}")">@file.Name</a>
                 </div>
                 <div class="p-1 col-2">@file.ModifyTime</div>
                 <div class="text-center p-1 col-2">@file.Size</div>

@@ -38,10 +38,17 @@
         </Content>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Configuration\" />
+      <Folder Include="ViewModels\FileBrowser\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="wwwroot\app_offline.htm" />
+    </ItemGroup>
+
     <ProjectExtensions>
-        <VisualStudio>
-            <UserProperties configuration_4staticfile_1json__JsonSchema="https://json.schemastore.org/appsettings.json" />
-        </VisualStudio>
+        <VisualStudio><UserProperties /></VisualStudio>
     </ProjectExtensions>
 
 </Project>

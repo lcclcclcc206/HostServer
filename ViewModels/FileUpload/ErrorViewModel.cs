@@ -1,8 +1,7 @@
-﻿namespace HostServer.ViewModels.FileUpload
+﻿namespace HostServer.ViewModels.FileUpload;
+
+public class ErrorViewModel
 {
-    public class ErrorViewModel
-    {
-        public string? RequestId { get; set;}
-        public string? ErrorMessage { get; set;}
-    }
+    public string? RequestId { get; set;}
+    public string? ErrorMessage { get; set;}
 }

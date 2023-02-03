@@ -42,7 +42,7 @@ namespace HostServer.Controllers
                 contentSize += uploadFile.Length;
             }
 
-            if (contentSize > HostConfiguration.UploadFileProvider!.FileSizeLimit)
+            if (contentSize > HostConfiguration.UploadFileConfig!.FileSizeLimit)
             {
                 var requestId = Activity.Current?.Id;
                 var message = $"The file size: {ByteSize.FromBytes(contentSize)} is over the limit!";
@@ -52,7 +52,7 @@ namespace HostServer.Controllers
 
             foreach (IFormFile uploadFile in uploadFiles)
             {
-                string path = HostConfiguration.UploadFileProvider!.RootPath!;
+                string path = HostConfiguration.UploadFileConfig!.RootPath!;
                 string filePath = Path.Combine(path, uploadFile.FileName);
                 using (var stream = System.IO.File.Create(filePath))
                 {
@@ -73,7 +73,7 @@ namespace HostServer.Controllers
                 return View("Error", new ErrorViewModel() { RequestId = requestId, ErrorMessage = message });
             }
 
-            var path = Path.Combine(HostConfiguration.UploadFileProvider!.RootPath!, "text");
+            var path = Path.Combine(HostConfiguration.UploadFileConfig!.RootPath!, "text");
             if(Path.Exists(path) is false)
             {
                 Directory.CreateDirectory(path);

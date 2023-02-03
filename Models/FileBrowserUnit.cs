@@ -1,11 +1,13 @@
 ﻿using ByteSizeLib;
 using HostServer.Extentions;
 using HostServer.Helper;
+using System.Collections;
 
 namespace HostServer.Models
 {
     public class FileBrowserUnit
     {
+        public string? AccessKey { get; set; }
         public string? BasePath { get; set; }
         public string? RelativePath { get; set; }
         public string Path
