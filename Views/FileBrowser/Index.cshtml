@@ -26,6 +26,13 @@
     }
 }
 
+@{
+    string GetRelativeUrl(string sourcePath, string relativePath)
+    {
+        return string.Format($"{sourcePath}{(string.IsNullOrEmpty(sourcePath) ? "" : "/")}{relativePath}");
+    }
+}
+
 <style>
     a:hover {
         text-decoration: underline;
@@ -69,16 +76,16 @@
         {
             <div class="row border-bottom align-items-center">
                 <div class="text-break p-1 col-6">
-                    <a class="fw-bold" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.RelativePath}")">
-                        @dir.RelativePath/
+                    <a class="fw-bold" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@GetRelativeUrl(Model.RelativePath,dir.Name)">
+                        @dir.Name/
                     </a>
                 </div>
                 <div class="p-1 col-2">@dir.ModifyTime.ToString()</div>
                 <div class="text-center p-1 col-2">
-                    <button onclick="" class="btn btn-outline-primary circle py-0">?</button>
+                    <button type="button" onclick="GetSize(this, '@Model.AccessKey', '@GetRelativeUrl(Model.RelativePath,dir.Name)')" class="btn btn-outline-primary circle py-0">?</button>
                 </div>
                 <div class="p-1 col-2 text-center">
-                    <a class="btn btn-primary py-0" asp-action="DownloadDirectory" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.RelativePath}")">下载</a>
+                    <a class="btn btn-primary py-0" asp-action="DownloadDirectory" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.Name}")">下载</a>
                 </div>
             </div>
         }
@@ -95,3 +102,24 @@
         }
     </div>
 </div>
+
+@section Scripts{
+    <script>
+        function GetSize(obj, accessKey, relativePath) {
+            let url = `/FileBrowser/GetDirectorySize?AccessKey=${accessKey}&relativePath=${relativePath}`;
+            let parent = obj.parentElement;
+
+            fetch(url)
+                .then(response => {
+                    if(!response.ok){
+                        throw new Error(`HTTP error: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(text => {
+                    parent.innerHTML = text;
+                })
+                .catch(error => parent.innerHTML = "ERROR!");
+        }
+    </script>
+}

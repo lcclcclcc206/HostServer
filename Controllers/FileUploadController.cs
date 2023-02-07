@@ -60,7 +60,7 @@ namespace HostServer.Controllers
                 }
             }
 
-            return View("Index");
+            return RedirectToAction("Index");
         }
 
         [HttpPost]
@@ -88,7 +88,8 @@ namespace HostServer.Controllers
                     await stream.WriteAsync(uploadText);
                 }
             }
-            return View("Index");
+
+            return RedirectToAction("Index");
         }
 
         public IActionResult Error()

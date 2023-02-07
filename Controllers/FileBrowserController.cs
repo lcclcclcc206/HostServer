@@ -13,6 +13,7 @@ using System.IO.Pipes;
 using System.Net.Mime;
 using System.Text;
 using System.Web;
+using System.Xml.Linq;
 
 namespace HostServer.Controllers;
 
@@ -32,18 +33,14 @@ public class FileBrowserController : Controller
     public IActionResult Index(string? relativePath)
     {
         var basePath = "./";
-        AccessKey = AccessKey ?? HostConfiguration.FileBrowserConfig.DefaultAccessKey;
+        AccessKey ??= HostConfiguration.FileBrowserConfig.DefaultAccessKey;
         if (HostConfiguration.StaticFileAccessDictionary.ContainsKey(AccessKey))
             basePath = HostConfiguration.StaticFileAccessDictionary[AccessKey];
         else
             _logger.LogError($"FileBrowser error: access key {AccessKey} is not exist!");
 
-        FileBrowserUnit browser = new()
-        {
-            AccessKey= AccessKey,
-            BasePath = PathHelper.UnifySlash(Path.GetFullPath(basePath)),
-            RelativePath = relativePath is null ? "" : PathHelper.UnifySlash(relativePath)
-        };
+        basePath = PathHelper.UnifySlash(Path.GetFullPath(basePath));
+        FileBrowserUnit browser = new(AccessKey, basePath, relativePath ?? PathHelper.UnifySlash(relativePath));
 
         var path = PathHelper.UnifySlashForWindows(browser.Path, true);
         var dirs = Directory.GetDirectories(path);
@@ -54,22 +51,13 @@ public class FileBrowserController : Controller
             if (new FileInfo(dir).Attributes.HasFlag(FileAttributes.Hidden) is true)
                 continue;
 
-            var directoryUnit = new DirectoryUnit
-            {
-                RelativePath = Path.GetFileName(dir),
-                ModifyTime = Directory.GetLastWriteTime(dir)
-            };
+            var directoryUnit = new DirectoryUnit(Path.GetFileName(dir), Directory.GetLastWriteTime(dir));
             browser.DirectoryUnits.Add(directoryUnit);
         }
 
         foreach (var file in files)
         {
-            var fileUnit = new FileUnit
-            {
-                Name = Path.GetFileName(file),
-                ModifyTime = Directory.GetLastAccessTime(file),
-                Size = ByteSize.FromBytes(new FileInfo(file).Length)
-            };
+            var fileUnit = new FileUnit(Path.GetFileName(file), Directory.GetLastAccessTime(file), ByteSize.FromBytes(new FileInfo(file).Length));
             browser.FileUnits.Add(fileUnit);
         }
 
@@ -80,7 +68,7 @@ public class FileBrowserController : Controller
     public async Task<IActionResult> DownloadFile(string fileRequestPath)
     {
         var basePath = "./";
-        AccessKey = AccessKey ?? HostConfiguration.FileBrowserConfig.DefaultAccessKey;
+        AccessKey ??= HostConfiguration.FileBrowserConfig.DefaultAccessKey;
         if (HostConfiguration.StaticFileAccessDictionary.ContainsKey(AccessKey))
             basePath = HostConfiguration.StaticFileAccessDictionary[AccessKey];
         else
@@ -101,7 +89,7 @@ public class FileBrowserController : Controller
 
         int bufferSize = 1024 * 1024;
 
-        using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read))
+        using (FileStream fs = new(path, FileMode.Open, FileAccess.Read))
         {
             using (Response.Body)
             {
@@ -136,7 +124,7 @@ public class FileBrowserController : Controller
     public async Task<IActionResult> DownloadDirectory(string relativePath)
     {
         var basePath = "./";
-        AccessKey = AccessKey ?? HostConfiguration.FileBrowserConfig.DefaultAccessKey;
+        AccessKey ??= HostConfiguration.FileBrowserConfig.DefaultAccessKey;
         if (HostConfiguration.StaticFileAccessDictionary.ContainsKey(AccessKey))
             basePath = HostConfiguration.StaticFileAccessDictionary[AccessKey];
         else
@@ -149,7 +137,7 @@ public class FileBrowserController : Controller
         long sizeLimit = (long)ByteSize.FromMegaBytes(500).Bytes;
         if (size > sizeLimit)
         {
-            string message = $"The directory size: {ByteSize.FromBytes(size).ToString()} is out of limit: {ByteSize.FromBytes(sizeLimit).ToString()}";
+            string message = $"The directory size: {ByteSize.FromBytes(size)} is out of limit: {ByteSize.FromBytes(sizeLimit)}";
             return View("Error", new ErrorViewModel() { RequestId = Activity.Current?.Id, ErrorMessage = message });
         }
 
@@ -159,35 +147,39 @@ public class FileBrowserController : Controller
         };
         var fileList = Directory.EnumerateFiles(directoryInfo.FullName, "*", options);
 
-        //Response.Headers.Add("Content-Type", $"charset=utf-8");
         Response.Headers.Add("Content-Disposition", $"filename=\"{HttpUtility.UrlEncode(directoryInfo.Name, Encoding.UTF8)}.zip\"");
         using (var stream = HttpContext.Response.BodyWriter.AsStream())
         {
-            using (var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create))
+            using var zipArchive = new ZipArchive(stream, ZipArchiveMode.Create);
+            foreach (var file in fileList)
             {
-                foreach (var file in fileList)
+                var fileInfo = new FileInfo(file);
+                var filePath = fileInfo.FullName.Replace(directoryInfo.FullName, "");
+                if (filePath.StartsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
                 {
-                    var fileInfo = new FileInfo(file);
-                    var filePath = fileInfo.FullName.Replace(directoryInfo.FullName, "");
-                    if(filePath.StartsWith(Path.DirectorySeparatorChar.ToString(),StringComparison.Ordinal))
-                    {
-                        filePath = filePath.Substring(1);
-                    }
-
-                    var zipArchiveEntry =  zipArchive.CreateEntry(filePath, CompressionLevel.NoCompression);
-
-                    using(var entryStream = zipArchiveEntry.Open())
-                    {
-                        using(var toZipStream = fileInfo.OpenRead())
-                        {
-                            await toZipStream.CopyToAsync(entryStream);
-                        }
-                    }
+                    filePath = filePath[1..];
                 }
+
+                var zipArchiveEntry = zipArchive.CreateEntry(filePath, CompressionLevel.NoCompression);
+
+                using var entryStream = zipArchiveEntry.Open();
+                using var toZipStream = fileInfo.OpenRead();
+                await toZipStream.CopyToAsync(entryStream);
             }
         }
-
         return Empty;
     }
 
+    public string GetDirectorySize(string relativePath)
+    {
+        var basePath = "./";
+        AccessKey ??= HostConfiguration.FileBrowserConfig.DefaultAccessKey;
+        if (HostConfiguration.StaticFileAccessDictionary.ContainsKey(AccessKey))
+            basePath = HostConfiguration.StaticFileAccessDictionary[AccessKey];
+        else
+            _logger.LogError($"FileBrowser error: access key {AccessKey} is not exist!");
+
+        var path = PathHelper.UnifySlashForWindows(PathHelper.MergePath(basePath, relativePath), true);
+        return ByteSize.FromBytes(FileHelper.GetDirectorySize(path)).ToString();
+    }
 }

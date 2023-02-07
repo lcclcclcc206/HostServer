@@ -39,7 +39,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Configuration\" />
       <Folder Include="ViewModels\FileBrowser\" />
     </ItemGroup>
 
@@ -48,7 +47,7 @@
     </ItemGroup>
 
     <ProjectExtensions>
-        <VisualStudio><UserProperties /></VisualStudio>
+        <VisualStudio><UserProperties configuration_4staticfile_1json__JsonSchema="https://json.schemastore.org/appsettings.json" /></VisualStudio>
     </ProjectExtensions>
 
 </Project>

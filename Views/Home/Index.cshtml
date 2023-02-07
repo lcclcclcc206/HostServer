@@ -14,8 +14,7 @@
         <div class="list-group">
             @foreach (var config in HostConfiguration.UniversalFileConfigList!)
             {
-
-                <a asp-controller="FileBrowser" asp-route-AccessKey="@config.AccessKey" class="list-group-item list-group-item-primary list-group-item-action">@config.DisplayName</a>
+                <a asp-controller="FileBrowser" asp-route-AccessKey="@config.AccessKey" class="list-group-item list-group-item-primary list-group-item-action">@config.AccessKey</a>
             }
         </div>
 

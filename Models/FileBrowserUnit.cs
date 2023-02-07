@@ -7,35 +7,55 @@ namespace HostServer.Models
 {
     public class FileBrowserUnit
     {
-        public string? AccessKey { get; set; }
-        public string? BasePath { get; set; }
-        public string? RelativePath { get; set; }
+        public FileBrowserUnit(string accessKey, string basePath, string relativePath)
+        {
+            AccessKey = accessKey;
+            BasePath = basePath;
+            RelativePath = relativePath;
+        }
+
+        public string AccessKey { get; init; }
+        public string BasePath { get; init; }
+        public string RelativePath { get; init; }
+
         public string Path
         {
             get
             {
-                
-                if(BasePath is null || RelativePath is null)
+
+                if (BasePath is null || RelativePath is null)
                     return "";
-                BasePath = PathHelper.UnifySlash(BasePath);
-                RelativePath = PathHelper.UnifySlash(RelativePath);
-                return PathHelper.MergePath(BasePath,RelativePath);
+                var basePath = PathHelper.UnifySlash(BasePath);
+                var relativePath = PathHelper.UnifySlash(RelativePath);
+                return PathHelper.MergePath(basePath, relativePath);
             }
         }
-        public List<FileUnit> FileUnits { get; set; } = new();
-        public List<DirectoryUnit> DirectoryUnits { get; set; } = new();
+        public List<FileUnit> FileUnits { get; init; } = new();
+        public List<DirectoryUnit> DirectoryUnits { get; init; } = new();
     }
 
     public class FileUnit
     {
-        public string? Name { get; set; }
-        public DateTime? ModifyTime { get; set; }
-        public ByteSize? Size { get; set; }
+        public FileUnit(string name, DateTime modifyTime, ByteSize size)
+        {
+            Name = name;
+            ModifyTime = modifyTime;
+            Size = size;
+        }
+        public string Name { get;init; }
+        public DateTime ModifyTime { get; init; }
+        public ByteSize Size { get; init; }
     }
 
     public class DirectoryUnit
     {
-        public string? RelativePath { get; set; }
-        public DateTime? ModifyTime { get; set; }
+        public DirectoryUnit(string name, DateTime modifyTime)
+        {
+            Name = name;
+            ModifyTime = modifyTime;
+        }
+
+        public string Name { get; init; }
+        public DateTime ModifyTime { get; init; }
     }
 }

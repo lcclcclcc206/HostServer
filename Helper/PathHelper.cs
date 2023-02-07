@@ -4,10 +4,10 @@ namespace HostServer.Helper;
 
 public static class PathHelper
 {
-    public static string UnifySlash(string path)
+    public static string UnifySlash(string? path)
     {
         if (string.IsNullOrWhiteSpace(path))
-            return path;
+            return path?? "";
         path = path.Replace('\\', '/');
         if (path.Last() == '/')
             path = path.Remove(path.Length - 1, 1);
