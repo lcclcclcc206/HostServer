@@ -63,6 +63,7 @@
     </div>
 
     <a class="btn btn-primary" asp-route-AccessKey="@Model.AccessKey" asp-action="Index">返回根目录</a>
+    <a class="btn btn-primary" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@Model.RelativePath" asp-action="DownloadDirectory">下载本目录</a>
 
     <div class="container mt-3">
         <div class="row text-center border-bottom">
@@ -85,7 +86,7 @@
                     <button type="button" onclick="GetSize(this, '@Model.AccessKey', '@GetRelativeUrl(Model.RelativePath,dir.Name)')" class="btn btn-outline-primary circle py-0">?</button>
                 </div>
                 <div class="p-1 col-2 text-center">
-                    <a class="btn btn-primary py-0" asp-action="DownloadDirectory" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{dir.Name}")">下载</a>
+                    <a class="btn btn-primary py-0" asp-action="DownloadDirectory" asp-route-AccessKey="@Model.AccessKey" asp-route-relativePath="@GetRelativeUrl(Model.RelativePath,dir.Name)">下载</a>
                 </div>
             </div>
         }
@@ -93,7 +94,7 @@
         {
             <div class="row border-bottom align-items-center">
                 <div class="text-break p-1 col-6">
-                    <a asp-action="DownloadFile" asp-route-AccessKey="@Model.AccessKey" asp-route-fileRequestPath="@string.Format($"{Model.RelativePath}{(string.IsNullOrEmpty(Model.RelativePath) ? "" : "/")}{file.Name}")">@file.Name</a>
+                    <a asp-action="DownloadFile" asp-route-AccessKey="@Model.AccessKey" asp-route-fileRequestPath="@GetRelativeUrl(Model.RelativePath,file.Name)">@file.Name</a>
                 </div>
                 <div class="p-1 col-2">@file.ModifyTime</div>
                 <div class="text-center p-1 col-2">@file.Size</div>

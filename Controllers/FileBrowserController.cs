@@ -134,7 +134,7 @@ public class FileBrowserController : Controller
         var directoryInfo = new DirectoryInfo(path);
 
         long size = FileHelper.GetDirectorySize(directoryInfo.FullName);
-        long sizeLimit = (long)ByteSize.FromMegaBytes(500).Bytes;
+        long sizeLimit = (long)ByteSize.FromGigaBytes(50).Bytes;
         if (size > sizeLimit)
         {
             string message = $"The directory size: {ByteSize.FromBytes(size)} is out of limit: {ByteSize.FromBytes(sizeLimit)}";
