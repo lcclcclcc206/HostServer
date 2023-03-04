@@ -6,11 +6,15 @@ HostServer 是一个用于部署在本机（无论是服务器、还是个人电
 
 主页 - 访问静态文件（页面效果仅供参考）
 
-![主页](.image/.README/image-20230122191147298.png)
+![image-20230227222005749](.image/.README/image-20230227222005749.png)
 
 上传文件至指定目录
 
-![image-20230122191246806](.image/.README/image-20230122191246806.png)
+![image-20230227222028147](.image/.README/image-20230227222028147.png)
+
+文件浏览
+
+![image-20230227222207541](.image/.README/image-20230227222207541.png)
 
 ## 要求
 
@@ -64,7 +68,7 @@ Set-ExecutionPolicy RemoteSigned
 .\Deploy.ps1
 ```
 
-> 该脚本会默认将可执行文件部署到 `D:\HostServer` 上，如果需要自定义部署位置，请修改脚本。（如果要部署到 C 盘，需要对部署的文件夹添加 Authenticated Users 用户修改等权限，如果部署失败，请进行检查，重启命令行后重试）
+> 该脚本会默认将可执行文件部署到 `D:\HostServer` 上，如果需要自定义部署位置，请修改脚本。（如果要部署到 C 盘，需要对部署的文件夹添加 Authenticated Users 用户修改等权限，然后重启 IIS，如果部署失败，请进行检查，重启命令行后重试）
 
 ### 配置并启动服务
 
@@ -72,41 +76,43 @@ Set-ExecutionPolicy RemoteSigned
 
 HostServer 需要配置文件来映射对应的空间，在部署的文件夹中新建 Configuration 文件夹，新建 staticfile.json 文件，以下为示例
 
-staticfile.json
+**staticfile.json**
 
 ```json
 {
-  "Universal": [
-    {
-      "DisplayName": "D:",
-      "RootPath": "D:/",
-      "RequestPath": "/static"
+  "StaticFile": {
+    "Universal": [
+      {
+        "AccessKey": "D 盘",
+        "RootPath": "D:/"
+      }
+    ],
+    "UploadFile": {
+      "AccessKey": "UploadFile",
+      "RootPath": "./static/uploadfile",
+      "FileSizeLimit": 2000000000
+    },
+    "FileBrowser": {
+      "DefaultAccessKey": "FileBrowser",
+      "DefaultRootPath": "D:/"
     }
-  ],
-  "UploadFile": {
-    "RootPath": "./static/uploadfile",
-    "RequestPath": "/static/uploadfile",
-    "FileSizeLimit": 10485760
   }
 }
 ```
 
 在 staticfile.json 中：
 
-- Universal 代表的是映射的通用文件夹，这些文件夹的链接会在主页上显示，请注意，Universal 能映射多个文件夹。如果因为权限或者路径错误的原因导致映射失败，HostServer 不会显示该链接。
+- **Universal** 代表的是映射的通用文件夹，这些文件夹的链接会在主页上显示，请注意，Universal 能映射多个文件夹。如果因为权限或者路径错误的原因导致映射失败，HostServer 不会显示该链接。
 
-  - DisplayName 代表链接显示的名字
+  - **AccessKey** 代表服务器访问相应文件夹对应的标识，**它应该是唯一的**
 
-  - RootPath 代表映射文件夹的路径
+  - **RootPath** 代表映射文件夹的路径
 
     > 在 Windows 上，如果映射了 C 盘的文件夹，需要对相应文件夹添加 Authenticated Users 用户的修改读取等权限
 
-  - RequestPath 代表 url 路径
+- **UploadFile** 代表的是上传文件的文件夹，上传的文件将存放在这个地方，并且，使用者可以设置文件大小的限制
 
-- UploadFile 代表的是上传文件的文件夹，上传的文件将存放在这个地方，并且，使用者可以设置文件大小的限制
-
-  - RootPath 和 RequestPath 与 Universal 设置的含义相同
-  - FileSizeLimit，每次上传文件的大小限制，单位是字节 Byte
+  - **FileSizeLimit**，每次上传文件的大小限制，单位是字节 Byte
 
 #### 使用 IIS 托管应用
 
@@ -132,10 +138,8 @@ IIS 主页 > 模块
 
 部署完后，还要修改其他的配置，如下：
 
-在主页中选择请求筛选，选择编辑功能设置，选择双重转义和允许的最大内容长度（与上传的最大文件大小相关）。
+在主页中选择请求筛选，选择编辑功能设置，修改允许的最大内容长度（与上传的最大文件大小相关）。
 
 ![2023-01-23 084227](.image/.README/2023-01-23_084227.png)
 
 配置完后即可访问网站主页查看效果
-
-![主页](.image/.README/image-20230122191147298.png)
