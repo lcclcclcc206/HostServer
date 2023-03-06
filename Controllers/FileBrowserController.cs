@@ -14,6 +14,7 @@ using System.Net.Mime;
 using System.Text;
 using System.Web;
 using System.Xml.Linq;
+using System.Runtime.InteropServices;
 
 namespace HostServer.Controllers;
 
@@ -42,7 +43,10 @@ public class FileBrowserController : Controller
         basePath = PathHelper.UnifySlash(Path.GetFullPath(basePath));
         FileBrowserUnit browser = new(AccessKey, basePath, relativePath ?? PathHelper.UnifySlash(relativePath));
 
-        var path = PathHelper.UnifySlashForWindows(browser.Path, true);
+        var path = browser.Path;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            path = PathHelper.UnifySlashForWindows(path, true);
+
         var dirs = Directory.GetDirectories(path);
         var files = Directory.GetFiles(path);
 
@@ -74,7 +78,9 @@ public class FileBrowserController : Controller
         else
             _logger.LogError($"FileBrowser error: access key {AccessKey} is not exist!");
 
-        var path = PathHelper.UnifySlashForWindows(PathHelper.MergePath(basePath, fileRequestPath), false);
+        var path = PathHelper.MergePath(basePath, fileRequestPath);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            path = PathHelper.UnifySlashForWindows(path, false);
 
         var provider = new FileExtensionContentTypeProvider();
         string contentType;
@@ -101,14 +107,14 @@ public class FileBrowserController : Controller
 
                 while (hasRead < contentLength)
                 {
-                    if(HttpContext.RequestAborted.IsCancellationRequested)
+                    if (HttpContext.RequestAborted.IsCancellationRequested)
                     {
                         break;
                     }
 
                     buffer = new byte[bufferSize];
 
-                    int currentRead = await fs.ReadAsync(buffer,0 , bufferSize);
+                    int currentRead = await fs.ReadAsync(buffer, 0, bufferSize);
 
                     await Response.Body.WriteAsync(buffer, 0, currentRead);
 
@@ -130,7 +136,9 @@ public class FileBrowserController : Controller
         else
             _logger.LogError($"FileBrowser error: access key {AccessKey} is not exist!");
 
-        var path = PathHelper.UnifySlashForWindows(PathHelper.MergePath(basePath, relativePath), true);
+        var path = PathHelper.MergePath(basePath, relativePath);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            path = PathHelper.UnifySlashForWindows(path, true);
         var directoryInfo = new DirectoryInfo(path);
 
         long size = FileHelper.GetDirectorySize(directoryInfo.FullName);
@@ -179,7 +187,9 @@ public class FileBrowserController : Controller
         else
             _logger.LogError($"FileBrowser error: access key {AccessKey} is not exist!");
 
-        var path = PathHelper.UnifySlashForWindows(PathHelper.MergePath(basePath, relativePath), true);
+        var path = PathHelper.MergePath(basePath, relativePath);
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            path = PathHelper.UnifySlashForWindows(path, true);
         return ByteSize.FromBytes(FileHelper.GetDirectorySize(path)).ToString();
     }
 }
